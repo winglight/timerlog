@@ -29,10 +29,6 @@ app.use(function(err, req, res, next) {
 //mongodb://localhost:27017/timelog?retryWrites=true&w=majority
 var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_COBALT_URI || 'mongodb+srv://cluster0.oer4n.mongodb.net/timelog?retryWrites=true&w=majority';
 mongoose.connect(mongoUri, {
-  auth: {
-    user: "admin",
-    password: "gP5Ei%^7Vn5X"
-  },
   useNewUrlParser: true,
   useCreateIndex: true
 });
