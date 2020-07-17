@@ -1,0 +1,9 @@
+{
+  "name": "Timer Log Server",
+  "description": "A logger backend for time management",
+  "repository": "https://github.com/winglight/timerlog",
+  "logo": "https://avatars1.githubusercontent.com/u/1176967?s=460&v=4",
+  "keywords": ["node", "express", "timerlog"],
+  "image": "heroku/nodejs",
+  "addons": ["mongolab"]
+}
