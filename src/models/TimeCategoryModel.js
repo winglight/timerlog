@@ -11,7 +11,7 @@ const timeCategoryModel = new mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['PRODUCTIVE', 'NEUTRAL', 'REST', 'WAST'],
+        enum: ['PRODUCTIVE', 'NEUTRAL', 'REST', 'WASTE'],
         default: ''
     },
     todayDuration: {
@@ -34,6 +34,7 @@ const timeCategoryModel = new mongoose.Schema({
         min: 0,
         default: 0
     },
+    durations: [Number],
 }, { timestamps: { createdAt: 'created_at' } });
 
 mongoose.model('TimeCategory', timeCategoryModel);

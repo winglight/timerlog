@@ -19,6 +19,10 @@ module.exports = (req, res, next) => {
     const { userId } = payload;
 
     const user = await User.findById(userId);
+    // console.log('user: ' + JSON.stringify(user))
+    if(!user){
+      return res.status(401).send({ error: 'You must be logged in.' });
+    }
     req.user = user;
     next();
   });

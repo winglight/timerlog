@@ -27,7 +27,7 @@ app.use(function(err, req, res, next) {
 //gP5Ei%^7Vn5X
 //mongodb+srv://admin:gP5Ei%^7Vn5X@cluster0.oer4n.mongodb.net/timelog?retryWrites=true&w=majority
 //mongodb://localhost:27017/timelog?retryWrites=true&w=majority
-var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_COBALT_URI || 'mongodb+srv://cluster0.oer4n.mongodb.net/timelog?retryWrites=true&w=majority';
+var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_COBALT_URI || 'mongodb://localhost:27017/timelog?retryWrites=true&w=majority';
 mongoose.connect(mongoUri, {
   useNewUrlParser: true,
   useCreateIndex: true

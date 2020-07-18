@@ -60,6 +60,27 @@ const getTotalValues = async (userId) => {
   return resultArray;
 }
 
+const getCatDurations = async (userId) => {
+  const today = moment();
+
+  const pipeline = [
+        { "$match": {
+            "userId": { "$eq": userId },
+            "startTime": { "$gte": today.startOf('day').toDate(),
+            "$lt": today.endOf('day').toDate()},
+          }},
+        {
+          "$group": {
+            "_id": "$category",
+            "durations": { "push": "$duration" },
+          }
+        },
+      ],
+      resultArray = await TimeLog.aggregate(pipeline);
+
+  return resultArray;
+}
+
 router.get('/logstats', async (req, res) => {
   if (req.user.lastStatTime == null || req.user.lastStatTime < moment().startOf('day').toDate()) {
     const stats = await getTotalValues(req.user._id);
@@ -70,6 +91,14 @@ router.get('/logstats', async (req, res) => {
           weekDuration: item.weekDuration,
           monthDuration: item.monthDuration,
           yearDuration: item.yearDuration
+        }
+      });
+    });
+    const stats2 = await getCatDurations(req.user._id);
+    stats2.map(async (item) => {
+      await TimeCategory.findByIdAndUpdate(item._id, {
+        $set: {
+          durations: item.durations,
         }
       });
     });
@@ -101,35 +130,36 @@ router.delete('/logs/:id', async (req, res) => {
 });
 
 router.post('/logs', async (req, res) => {
-  const { _id, category, startDate, endDate  } = req.body;
+  const { _id, category, startTime, endTime  } = req.body;
 
-  const date = moment(startDate).format('YYYY-MM-DD');
-  const duration = moment(endDate).diff(moment(startDate), "minutes");
+  const date = moment(startTime).format('YYYY-MM-DD');
+  const duration = moment(endTime).diff(moment(startTime), "minutes");
 
-  if (!category || !startDate || !endDate) {
+  if (!category || !startTime || !endTime) {
     return res
       .status(422)
-      .send({ error: 'You must provide a category and startDate and endDate' });
+      .send({ error: 'You must provide a category and startTime and endTime' });
   }
 
   try {
     if(_id){
         // console.log('cat: ' + JSON.stringify(cat));
       await TimeLog.updateOne({_id: _id, userId: req.user._id, category: category,
-        startDate: startDate, endDate: endDate, date: date, duration: duration });
+        startTime: startTime, endTime: endTime, date: date, duration: duration });
       // await TimeCategory.findOneAndUpdate({_id: _id, userId: req.user._id}, { name: name, type: type });
         res.send({msg: 'Succeed to update!'});
     }else {
       const log = new TimeLog({userId: req.user._id, category: category,
-        startDate: startDate, endDate: endDate, date: date, duration: duration});
+        startTime: startTime, endTime: endTime, date: date, duration: duration});
       await log.save();
 
-      const dayDuration = moment().isSame(moment(startDate), 'day') ? duration : 0;
-      const weekDuration = moment().isSame(moment(startDate), 'week') ? duration : 0;
-      const monthDuration = moment().isSame(moment(startDate), 'month') ? duration : 0;
-      const yearDuration = moment().isSame(moment(startDate), 'year') ? duration : 0;
+      const dayDuration = moment().isSame(moment(startTime), 'day') ? duration : 0;
+      const weekDuration = moment().isSame(moment(startTime), 'week') ? duration : 0;
+      const monthDuration = moment().isSame(moment(startTime), 'month') ? duration : 0;
+      const yearDuration = moment().isSame(moment(startTime), 'year') ? duration : 0;
 
-      await TimeCategory.findByIdAndUpdate(category, { $inc: { todayDuration: dayDuration, weekDuration: weekDuration, monthDuration: monthDuration, yearDuration: yearDuration }});
+      await TimeCategory.findByIdAndUpdate(category, { $inc: { todayDuration: dayDuration, weekDuration: weekDuration, monthDuration: monthDuration, yearDuration: yearDuration },
+      $push: {durations: duration}});
 
       const cat = TimeCategory.findById(category);
 
