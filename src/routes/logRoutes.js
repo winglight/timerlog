@@ -13,10 +13,21 @@ const router = express.Router();
 router.use(requireAuth);
 
 router.get('/logs', async (req, res) => {
-  const { startDate, endDate } = req.body;
+  let { startDate, endDate } = req.body;
+  if(!startDate){
+    startDate = moment().startOf('day').toDate();
+  }else {
+    startDate = moment(startDate).startOf('day').toDate()
+  }
+  if(!endDate){
+    endDate = moment().endOf('day').toDate();
+  }else {
+    endDate = moment(endDate).endOf('day').toDate();
+  }
 
+  console.log(startDate, endDate);
     const logs = await TimeLog.find({
-      userId: req.user._id, startTime: moment(startDate).toDate(), endTime: moment(endDate).toDate()
+      userId: req.user._id, startTime: { $gte: startDate,  $lte: endDate}
     });
 
     res.send(logs);
@@ -72,7 +83,7 @@ const getCatDurations = async (userId) => {
         {
           "$group": {
             "_id": "$category",
-            "durations": { "push": "$duration" },
+            "durations": { "$push": "$duration" },
           }
         },
       ],
@@ -95,6 +106,7 @@ router.get('/logstats', async (req, res) => {
       });
     });
     const stats2 = await getCatDurations(req.user._id);
+    console.log('stats2: ' + JSON.stringify(stats2));
     stats2.map(async (item) => {
       await TimeCategory.findByIdAndUpdate(item._id, {
         $set: {
@@ -110,11 +122,21 @@ router.get('/logstats', async (req, res) => {
 });
 
 router.get('/logs/:catId', async (req, res) => {
-  const { startDate, endDate } = req.body;
-
+  let { startDate, endDate } = req.body;
+  if(!startDate){
+    startDate = moment().startOf('day').toDate();
+  }else {
+    startDate = moment(startDate).startOf('day').toDate()
+  }
+  if(!endDate){
+    endDate = moment().endOf('day').toDate();
+  }else {
+    endDate = moment(endDate).endOf('day').toDate();
+  }
+  console.log(startDate, endDate, req.params.catId);
     const logs = await TimeLog.find({
       userId: req.user._id,
-      category: req.params.catId, startTime: { $gte: moment(startDate).startOf('day').toDate(),  $lte: moment(endDate).endOf('day').toDate()}
+      category: req.params.catId, startTime: { $gte: startDate,  $lte: endDate}
     });
 
     res.send(logs);
