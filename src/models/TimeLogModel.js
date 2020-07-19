@@ -26,6 +26,7 @@ const timeLogModel = new mongoose.Schema({
         min: 0,
         default: 0
     },
+    tags: [String],
 }, { timestamps: { createdAt: 'created_at' } });
 
 mongoose.model('TimeLog', timeLogModel);

@@ -159,7 +159,7 @@ router.delete('/logs/:id', async (req, res) => {
 });
 
 router.post('/logs', async (req, res) => {
-  const { _id, category, startTime, endTime  } = req.body;
+  const { _id, category, startTime, endTime, tags  } = req.body;
 
   const date = moment(startTime).format('YYYY-MM-DD');
   const duration = moment(endTime).diff(moment(startTime), "minutes");
@@ -174,12 +174,12 @@ router.post('/logs', async (req, res) => {
     if(_id){
         // console.log('cat: ' + JSON.stringify(cat));
       await TimeLog.updateOne({_id: _id, userId: req.user._id, category: category,
-        startTime: startTime, endTime: endTime, date: date, duration: duration });
+        startTime: startTime, endTime: endTime, date: date, duration: duration, tags: tags });
       // await TimeCategory.findOneAndUpdate({_id: _id, userId: req.user._id}, { name: name, type: type });
         res.send({msg: 'Succeed to update!'});
     }else {
       const log = new TimeLog({userId: req.user._id, category: category,
-        startTime: startTime, endTime: endTime, date: date, duration: duration});
+        startTime: startTime, endTime: endTime, date: date, duration: duration, tags: tags});
       await log.save();
 
       const dayDuration = moment().isSame(moment(startTime), 'day') ? duration : 0;

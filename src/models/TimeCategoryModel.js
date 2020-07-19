@@ -35,6 +35,7 @@ const timeCategoryModel = new mongoose.Schema({
         default: 0
     },
     durations: [Number],
+    tags: [String],
 }, { timestamps: { createdAt: 'created_at' } });
 
 mongoose.model('TimeCategory', timeCategoryModel);
