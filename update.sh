@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
 git pull
 
-pm2 restart 0
+pm2 stop index
+
+pm2 start src/index.js
