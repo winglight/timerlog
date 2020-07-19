@@ -105,6 +105,13 @@ router.get('/logstats', async (req, res) => {
         }
       });
     });
+    //reset durations of categories
+    await TimeCategory.updateMany({userId: req.user._id}, {
+      $set: {
+        durations: [],
+      }
+    });
+//update durations
     const stats2 = await getCatDurations(req.user._id);
     console.log('stats2: ' + JSON.stringify(stats2));
     stats2.map(async (item) => {
