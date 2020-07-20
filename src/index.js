@@ -1,3 +1,4 @@
+require('./utils/global');
 require('./models/User');
 require('./models/Track');
 require('./models/TimeCategoryModel');

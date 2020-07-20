@@ -1,0 +1,1 @@
+global.flattenJsonObj = function (k, v) { return k && v && typeof v !== "number" ? "" + v : v; };

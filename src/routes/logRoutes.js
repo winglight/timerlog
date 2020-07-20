@@ -190,9 +190,9 @@ router.post('/logs', async (req, res) => {
       await TimeCategory.findByIdAndUpdate(category, { $inc: { todayDuration: dayDuration, weekDuration: weekDuration, monthDuration: monthDuration, yearDuration: yearDuration },
       $push: {durations: duration}});
 
-      const cat = TimeCategory.findById(category);
+      const cat = await TimeCategory.findById(category);
 
-          res.send({log});
+          res.send({cat, log});
     }
 
   } catch (err) {
