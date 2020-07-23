@@ -25,8 +25,7 @@ app.use(function(err, req, res, next) {
   console.error(err.stack);
   res.status(500).send(err.message);
 });
-//gP5Ei%^7Vn5X
-//mongodb+srv://admin:gP5Ei%^7Vn5X@cluster0.oer4n.mongodb.net/timelog?retryWrites=true&w=majority
+//mongodb+srv://admin:WOUbEAItpMWGQDHY@cluster0.oer4n.mongodb.net/timelog?retryWrites=true&w=majority
 //mongodb://localhost:27017/timelog?retryWrites=true&w=majority
 var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_COBALT_URI || 'mongodb://localhost:27017/timelog?retryWrites=true&w=majority';
 mongoose.connect(mongoUri, {

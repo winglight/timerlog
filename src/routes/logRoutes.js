@@ -51,6 +51,10 @@ const getTotalValues = async (userId) => {
                 { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('week').toDate()]}, {$lt: ["$startTime", today.endOf('week').toDate()]}]}, true, false] },
             "month":
                 { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
+            "month3":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(3, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
+            "month6":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(6, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
             "year":
                 { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('year').toDate()]}, {$lt: ["$startTime", today.endOf('year').toDate()]}]}, true, false] },
 
@@ -62,7 +66,56 @@ const getTotalValues = async (userId) => {
             "todayDuration": { "$sum": { "$cond": [{ "$eq": ["$today", true] }, "$duration", 0] } },
             "weekDuration": { "$sum": { "$cond": [{ "$eq": ["$week", true] }, "$duration", 0] } },
             "monthDuration": { "$sum": { "$cond": [{ "$eq": ["$month", true] }, "$duration", 0] } },
+            "month3Duration": { "$sum": { "$cond": [{ "$eq": ["$month3", true] }, "$duration", 0] } },
+            "month6Duration": { "$sum": { "$cond": [{ "$eq": ["$month6", true] }, "$duration", 0] } },
             "yearDuration": { "$sum": { "$cond": [{ "$eq": ["$year", true] }, "$duration", 0] } },
+            "allDuration": { "$sum": "$duration" },
+          }
+        },
+      ],
+      resultArray = await TimeLog.aggregate(pipeline);
+
+  return resultArray;
+}
+
+const getTotalTagsValues = async (userId) => {
+  const today = moment();
+
+  const pipeline = [
+        { "$match": {
+            "userId": { "$eq": userId }
+          }},
+        {
+          $project: {
+            "_id":0,
+            "tags": "$tags",
+            "duration": "$duration",
+            "today":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('day').toDate()]}, {$lt: ["$startTime", today.endOf('day').toDate()]}]}, true, false] },
+            "week":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('week').toDate()]}, {$lt: ["$startTime", today.endOf('week').toDate()]}]}, true, false] },
+            "month":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
+            "month3":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(3, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
+            "month6":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(6, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
+            "year":
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('year').toDate()]}, {$lt: ["$startTime", today.endOf('year').toDate()]}]}, true, false] },
+
+          }
+        },
+        {$unwind:"$tags"},
+        {
+          "$group": {
+            "_id": "$tags",
+            "todayDuration": { "$sum": { "$cond": [{ "$eq": ["$today", true] }, "$duration", 0] } },
+            "weekDuration": { "$sum": { "$cond": [{ "$eq": ["$week", true] }, "$duration", 0] } },
+            "monthDuration": { "$sum": { "$cond": [{ "$eq": ["$month", true] }, "$duration", 0] } },
+            "month3Duration": { "$sum": { "$cond": [{ "$eq": ["$month3", true] }, "$duration", 0] } },
+            "month6Duration": { "$sum": { "$cond": [{ "$eq": ["$month6", true] }, "$duration", 0] } },
+            "yearDuration": { "$sum": { "$cond": [{ "$eq": ["$year", true] }, "$duration", 0] } },
+            "allDuration": { "$sum": "$duration" },
           }
         },
       ],
@@ -92,6 +145,23 @@ const getCatDurations = async (userId) => {
   return resultArray;
 }
 
+const getLogDurations = async (conditions) => {
+  const today = moment();
+
+  const pipeline = [
+        { "$match": conditions},
+        {
+          "$group": {
+            "_id": "$date",
+            "durations": { "$sum": "$duration" },
+          }
+        },
+      ],
+      resultArray = await TimeLog.aggregate(pipeline);
+
+  return resultArray;
+}
+
 router.get('/logstats', async (req, res) => {
   if (req.user.lastStatTime == null || req.user.lastStatTime < moment().startOf('day').toDate()) {
     const stats = await getTotalValues(req.user._id);
@@ -101,7 +171,10 @@ router.get('/logstats', async (req, res) => {
           todayDuration: item.todayDuration,
           weekDuration: item.weekDuration,
           monthDuration: item.monthDuration,
-          yearDuration: item.yearDuration
+          month3Duration: item.month3Duration,
+          month6Duration: item.month6Duration,
+          yearDuration: item.yearDuration,
+          allDuration: item.allDuration,
         }
       });
     });
@@ -126,6 +199,34 @@ router.get('/logstats', async (req, res) => {
   }
 
     res.send(await TimeCategory.find({ userId: req.user._id }));
+});
+
+router.get('/logstatsdetail', async (req, res) => {
+    const stats = await getTotalTagsValues(req.user._id);
+    res.send(stats);
+});
+
+router.get('/logsdaily', async (req, res) => {
+  let { startTime, type, category, tag } = req.query;
+  console.log('startTime: ' + startTime);
+  startTime = moment(startTime).startOf('day').toDate();
+  const conditions = {
+    userId: req.user._id, startTime: { $gte: startTime}
+  };
+  if(type && type !== 'all'){
+    conditions.type = type;
+  }
+  if(category && category !== 'all'){
+    conditions.category = category;
+  }
+  if(tag && tag !== 'all'){
+    conditions.tags = tag;
+  }
+  console.log('conditions: ' + JSON.stringify(conditions));
+
+  const logs = await getLogDurations(conditions);
+
+  res.send(logs);
 });
 
 router.get('/logs/:catId', async (req, res) => {
@@ -171,6 +272,12 @@ router.post('/logs', async (req, res) => {
   }
 
   try {
+    const lappedLog = await TimeLog.findOne({startTime: { $lte: moment(startTime).toDate()}, endTime: { $gt: moment(startTime).toDate()}});
+    if( lappedLog !== null){
+      return res
+          .status(422)
+          .send({ error: 'You can\'t set a startTime overlapped with another log!' });
+    }
     if(_id){
         // console.log('cat: ' + JSON.stringify(cat));
       await TimeLog.updateOne({_id: _id, userId: req.user._id, category: category,

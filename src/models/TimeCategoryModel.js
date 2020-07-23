@@ -29,12 +29,27 @@ const timeCategoryModel = new mongoose.Schema({
         min: 0,
         default: 0
     },
+    month3Duration: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
+    month6Duration: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
     yearDuration: {
         type: Number,
         min: 0,
         default: 0
     },
-    durations: [Number],
+    allDuration: {
+        type: Number,
+        min: 0,
+        default: 0
+    },
+    durations: [Number], //当天此类别日志的分钟数组
     tags: [String],
 }, { timestamps: { createdAt: 'created_at' } });
 
