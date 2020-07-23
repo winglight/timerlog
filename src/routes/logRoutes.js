@@ -52,9 +52,9 @@ const getTotalValues = async (userId) => {
             "month":
                 { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
             "month3":
-                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(3, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(2, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
             "month6":
-                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(6, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
+                { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('month').subtract(5, 'month').toDate()]}, {$lt: ["$startTime", today.endOf('month').toDate()]}]}, true, false] },
             "year":
                 { $cond: [{$and:[ { $gte: ["$startTime", today.startOf('year').toDate()]}, {$lt: ["$startTime", today.endOf('year').toDate()]}]}, true, false] },
 
@@ -78,13 +78,17 @@ const getTotalValues = async (userId) => {
   return resultArray;
 }
 
-const getTotalTagsValues = async (userId) => {
+const getTotalTagsValues = async (userId, catId) => {
   const today = moment();
+  const conditions = {
+    "userId": { "$eq": userId }
+  };
+  if(catId){
+    conditions.category = catId;
+  }
 
   const pipeline = [
-        { "$match": {
-            "userId": { "$eq": userId }
-          }},
+        { "$match": conditions},
         {
           $project: {
             "_id":0,
@@ -201,26 +205,29 @@ router.get('/logstats', async (req, res) => {
     res.send(await TimeCategory.find({ userId: req.user._id }));
 });
 
-router.get('/logstatsdetail', async (req, res) => {
-    const stats = await getTotalTagsValues(req.user._id);
+router.get('/logstatsdetail/:catId', async (req, res) => {
+    const stats = await getTotalTagsValues(req.user._id, req.params.catId);
     res.send(stats);
 });
 
 router.get('/logsdaily', async (req, res) => {
   let { startTime, type, category, tag } = req.query;
-  console.log('startTime: ' + startTime);
+  // console.log('startTime: ' + startTime);
   startTime = moment(startTime).startOf('day').toDate();
   const conditions = {
     userId: req.user._id, startTime: { $gte: startTime}
   };
   if(type && type !== 'all'){
-    conditions.type = type;
-  }
-  if(category && category !== 'all'){
-    conditions.category = category;
-  }
-  if(tag && tag !== 'all'){
-    conditions.tags = tag;
+    const types = await TimeCategory.find({ userId: req.user._id, type: type });
+    conditions.category = {$in: types.map(({_id}) => _id)};
+  }else {
+    if (category && category !== 'all') {
+      conditions.category =  category;
+    }else {
+      if (tag && tag !== 'all') {
+        conditions.tags = tag;
+      }
+    }
   }
   console.log('conditions: ' + JSON.stringify(conditions));
 
