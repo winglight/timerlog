@@ -81,11 +81,11 @@ const getTotalValues = async (userId) => {
 const getTotalTagsValues = async (userId, catId) => {
   const today = moment();
   const conditions = {
-    "userId": { "$eq": userId }
+    "userId": { "$eq": userId },
+    "category": { "$eq": mongoose.Types.ObjectId(catId) }
   };
-  if(catId){
-    conditions.category = catId;
-  }
+
+  console.log(JSON.stringify(conditions));
 
   const pipeline = [
         { "$match": conditions},
@@ -222,7 +222,7 @@ router.get('/logsdaily', async (req, res) => {
     conditions.category = {$in: types.map(({_id}) => _id)};
   }else {
     if (category && category !== 'all') {
-      conditions.category =  category;
+      conditions.category =  mongoose.Types.ObjectId(category);
     }else {
       if (tag && tag !== 'all') {
         conditions.tags = tag;
