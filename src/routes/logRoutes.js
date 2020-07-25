@@ -248,11 +248,17 @@ router.get('/logs/:catId', async (req, res) => {
   }else {
     endDate = moment(endDate).endOf('day').toDate();
   }
-  console.log(startDate, endDate, req.params.catId);
-    const logs = await TimeLog.find({
-      userId: req.user._id,
-      category: req.params.catId, startTime: { $gte: startDate,  $lte: endDate}
-    });
+  const conditions = {
+    userId: req.user._id,
+    startTime: { $gte: startDate,  $lte: endDate}
+  };
+
+  if(req.params.catId && req.params.catId !== 'all'){
+    conditions.category = req.params.catId;
+  }
+
+  console.log(conditions);
+    const logs = await TimeLog.find(conditions);
 
     res.send(logs);
 });
