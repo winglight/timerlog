@@ -150,8 +150,6 @@ const getCatDurations = async (userId) => {
 }
 
 const getLogDurations = async (conditions) => {
-  const today = moment();
-
   const pipeline = [
         { "$match": conditions},
         {
@@ -237,7 +235,7 @@ router.get('/logsdaily', async (req, res) => {
 });
 
 router.get('/logs/:catId', async (req, res) => {
-  let { startDate, endDate } = req.body;
+  let { startDate, endDate, group } = req.query;
   if(!startDate){
     startDate = moment().startOf('day').toDate();
   }else {
@@ -258,9 +256,15 @@ router.get('/logs/:catId', async (req, res) => {
   }
 
   console.log(conditions);
+  // if(group){
+  //   const logs = await getLogsGroupByDate(conditions);
+  //
+  //   res.send(logs);
+  // }else {
     const logs = await TimeLog.find(conditions);
 
     res.send(logs);
+  // }
 });
 
 router.delete('/logs/:id', async (req, res) => {
