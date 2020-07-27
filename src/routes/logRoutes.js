@@ -284,7 +284,6 @@ router.post('/logs', async (req, res) => {
 
   if (!category || !startTime || !endTime) {
     return res
-      .status(422)
       .send({ error: 'You must provide a category and startTime and endTime' });
   }
 
@@ -292,7 +291,6 @@ router.post('/logs', async (req, res) => {
     const lappedLog = await TimeLog.findOne({startTime: { $lte: moment(startTime).toDate()}, endTime: { $gt: moment(startTime).toDate()}});
     if( lappedLog !== null){
       return res
-          .status(422)
           .send({ error: 'You can\'t set a startTime overlapped with another log!' });
     }
     if(_id){

@@ -28,7 +28,6 @@ router.post('/categories', async (req, res) => {
 
   if (!name || !type) {
     return res
-      .status(422)
       .send({ error: 'You must provide a name and type' });
   }
 
