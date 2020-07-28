@@ -2,6 +2,17 @@ const express = require('express');
 const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const User = mongoose.model('User');
+const TimeCategory = mongoose.model('TimeCategory');
+
+const fs = require('fs');
+const initUserCats = async (userId) => {
+  let data = fs.readFileSync('./src/models/init_categories.json');
+  let cats = JSON.parse(data);
+  cats.forEach((item) => {
+    item.userId = userId;
+  });
+  TimeCategory.insertMany(cats);
+}
 
 const router = express.Router();
 
@@ -11,6 +22,8 @@ router.post('/signup', async (req, res) => {
   try {
     const user = new User({ email, password });
     await user.save();
+
+    await initUserCats(user._id);
 
     const token = jwt.sign({ userId: user._id }, 'MY_SECRET_KEY');
     res.send({ token });

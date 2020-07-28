@@ -1,0 +1,20 @@
+[
+  {
+    "name": "工作",
+    "type": "PRODUCTIVE",
+    "tags": "会议,出勤"
+  },
+  {
+    "name": "学习",
+    "type": "PRODUCTIVE",
+    "tags": "看书,做题"
+  },{
+    "name": "日常",
+    "type": "NEUTRAL",
+    "tags": "吃饭,睡觉"
+  },{
+    "name": "娱乐",
+    "type": "REST",
+    "tags": "看新闻,看视频"
+  }
+]
