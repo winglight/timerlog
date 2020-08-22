@@ -122,7 +122,8 @@ const getTotalTagsValues = async (userId, catId) => {
             "allDuration": { "$sum": "$duration" },
           }
         },
-      ],
+      ];
+
       resultArray = await TimeLog.aggregate(pipeline);
 
   return resultArray;
@@ -235,7 +236,7 @@ router.get('/logsdaily', async (req, res) => {
 });
 
 router.get('/logs/:catId', async (req, res) => {
-  let { startDate, endDate, group } = req.query;
+  let { startDate, endDate } = req.query;
   if(!startDate){
     startDate = moment().startOf('day').toDate();
   }else {
@@ -251,7 +252,7 @@ router.get('/logs/:catId', async (req, res) => {
     startTime: { $gte: startDate,  $lte: endDate}
   };
 
-  if(req.params.catId && req.params.catId !== 'all'){
+  if(req.params.catId && (req.params.catId.indexOf('all') == 0)){
     conditions.category = req.params.catId;
   }
 
