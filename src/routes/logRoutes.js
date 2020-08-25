@@ -219,11 +219,17 @@ router.get('/logs/:catId', async (req, res) => {
   if(!startDate){
     startDate = moment().startOf('day').toDate();
   }else {
+    if(startDate.length > 10){
+      startDate = parseInt(startDate);
+    }
     startDate = moment(startDate).startOf('day').toDate()
   }
   if(!endDate){
     endDate = moment().endOf('day').toDate();
   }else {
+    if(endDate.length > 10){
+      endDate = parseInt(endDate);
+    }
     endDate = moment(endDate).endOf('day').toDate();
   }
   const conditions = {
