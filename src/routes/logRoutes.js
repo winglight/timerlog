@@ -231,7 +231,7 @@ router.get('/logs/:catId', async (req, res) => {
     startTime: { $gte: startDate,  $lte: endDate}
   };
 
-  if(req.params.catId && (req.params.catId.indexOf('all') == 0)){
+  if(req.params.catId && (req.params.catId.indexOf('all') != 0)){
     conditions.category = req.params.catId;
   }
 
