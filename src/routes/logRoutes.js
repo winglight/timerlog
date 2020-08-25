@@ -12,27 +12,6 @@ const router = express.Router();
 
 router.use(requireAuth);
 
-router.get('/logs', async (req, res) => {
-  let { startDate, endDate } = req.body;
-  if(!startDate){
-    startDate = moment().startOf('day').toDate();
-  }else {
-    startDate = moment(startDate).startOf('day').toDate()
-  }
-  if(!endDate){
-    endDate = moment().endOf('day').toDate();
-  }else {
-    endDate = moment(endDate).endOf('day').toDate();
-  }
-
-  console.log(startDate, endDate);
-    const logs = await TimeLog.find({
-      userId: req.user._id, startTime: { $gte: startDate,  $lte: endDate}
-    });
-
-    res.send(logs);
-});
-
 const getTotalValues = async (userId) => {
   const today = moment();
 
