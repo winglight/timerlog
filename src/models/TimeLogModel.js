@@ -5,9 +5,17 @@ const timeLogModel = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'User'
     },
+    userName: {
+        type: String,
+        default: ''
+    },
     category: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'TimeCategory'
+    },
+    catName: {
+        type: String,
+        default: ''
     },
     startTime: {
         type: Date,
