@@ -30,7 +30,8 @@ app.use(function(err, req, res, next) {
 var mongoUri = process.env.MONGODB_URI || process.env.MONGOLAB_COBALT_URI || 'mongodb://localhost:27017/timelog?retryWrites=true&w=majority';
 mongoose.connect(mongoUri, {
   useNewUrlParser: true,
-  useCreateIndex: true
+  useCreateIndex: true,
+  useUnifiedTopology: true
 });
 mongoose.connection.on('connected', () => {
   console.log('Connected to mongo instance');

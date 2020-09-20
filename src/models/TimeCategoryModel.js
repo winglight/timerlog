@@ -14,6 +14,15 @@ const timeCategoryModel = new mongoose.Schema({
         enum: ['PRODUCTIVE', 'NEUTRAL', 'REST', 'WASTE'],
         default: ''
     },
+    planMinutes: {
+        type: Number,
+        min: 0,
+        default: 30
+    },
+    archived: {
+        type: Boolean,
+        default: false
+    },
     todayDuration: {
         type: Number,
         min: 0,

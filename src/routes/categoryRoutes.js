@@ -24,7 +24,7 @@ router.delete('/categories/:id', async (req, res) => {
 });
 
 router.post('/categories', async (req, res) => {
-  const { _id, name, type, tags } = req.body;
+  const { _id, name, type, planMinutes, archived, tags } = req.body;
 
   if (!name || !type) {
     return res
@@ -34,11 +34,12 @@ router.post('/categories', async (req, res) => {
   try {
     if(_id){
         // console.log('cat: ' + JSON.stringify(cat));
-      await TimeCategory.updateOne({_id: _id, userId: req.user._id}, { name: name, type: type, tags: tags });
+      await TimeCategory.updateOne({_id: _id, userId: req.user._id}, req.body);
       // await TimeCategory.findOneAndUpdate({_id: _id, userId: req.user._id}, { name: name, type: type });
         res.send({msg: 'Succeed to update!'});
     }else {
-      const cat = new TimeCategory({name, type, tags, userId: req.user._id});
+      req.body.userId = req.user._id;
+      const cat = new TimeCategory(req.body);
       await cat.save();
       res.send(cat);
     }
