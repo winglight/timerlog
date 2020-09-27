@@ -275,14 +275,18 @@ router.post('/logs', async (req, res) => {
 
   try {
     const lappedLog = await TimeLog.findOne({startTime: { $lte: moment(startTime).toDate()}, endTime: { $gt: moment(startTime).toDate()}});
-    if( lappedLog !== null){
+    // console.log(_id);
+    // console.log(lappedLog._id);
+    // console.log(_id !== lappedLog._id.toString());
+    if( lappedLog !== null && _id !== lappedLog._id.toString()){
       return res
           .send({ error: 'You can\'t set a startTime overlapped with another log!' });
     }
     if(_id){
         // console.log('cat: ' + JSON.stringify(cat));
-      await TimeLog.updateOne({_id: _id, userId: req.user._id, userName: req.user.email, category: category, catName: catName,
-        startTime: startTime, endTime: endTime, date: date, duration: duration, tags: tags });
+      await TimeLog.updateOne({_id: _id, userId: req.user._id}, 
+        {$set: {userName: req.user.email, category: category, catName: catName,
+        startTime: startTime, endTime: endTime, date: date, duration: duration, tags: tags }});
       // await TimeCategory.findOneAndUpdate({_id: _id, userId: req.user._id}, { name: name, type: type });
         res.send({msg: 'Succeed to update!'});
     }else {
